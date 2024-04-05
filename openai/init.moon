@@ -105,7 +105,7 @@ consume_json_head = do
   consume_json = P (str, pos) ->
     str_len = #str
     for k=pos+1,str_len
-      candidate = str\sub pos, k
+      candidate = string.sub str, pos, k
       parsed = false
       pcall -> parsed = cjson.decode candidate
       if parsed
