@@ -7,8 +7,6 @@ unpack = table.unpack or unpack
 
 import types from require "tableshape"
 
-parse_url = require("socket.url").parse
-
 empty = (types.nil + types.literal(cjson.null))\describe "nullable"
 
 content_format = types.string + types.array_of types.one_of {
@@ -246,8 +244,6 @@ class OpenAI
     assert test_messages messages
 
     payload = {
-      model: "gpt-3.5-turbo"
-      temperature: 0.5
       :messages
     }
 
@@ -264,13 +260,7 @@ class OpenAI
   -- opts: additional parameters as described in https://platform.openai.com/docs/api-reference/completions
   completion: (prompt, opts) =>
     payload = {
-      model: "text-davinci-003"
       :prompt
-      temperature: 0.5
-      max_tokens: 600
-      -- top_p: 1
-      -- frequency_penalty: 0
-      -- presence_penalty: 0
     }
 
     if opts
@@ -354,7 +344,6 @@ class OpenAI
       cjson.encode payload
 
     headers = {
-      "Host": parse_url(@api_base).host
       "Accept": "application/json"
       "Content-Type": "application/json"
       "Content-Length": body and #body or nil
@@ -362,6 +351,10 @@ class OpenAI
 
     if @api_key
       headers["Authorization"] = "Bearer #{@api_key}"
+
+    if @headers
+      for k,v in pairs @headers
+        headers[k] = v
 
     if more_headers
       for k,v in pairs more_headers
