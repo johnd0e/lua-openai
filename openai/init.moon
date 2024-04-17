@@ -81,7 +81,7 @@ parse_chat_response = types.partial {
 
 
 parse_completion_chunk = types.partial {
-  object: "chat.completion.chunk"
+  --object: "chat.completion.chunk"
   -- not sure of the whole range of chunks, so for now we strictly parse an append
   choices: types.shape {
     types.partial {
@@ -167,7 +167,8 @@ class ChatSession
 
       parts = {}
       f = @client\create_stream_filter (c) ->
-        table.insert parts, c.content
+        if c = parse_completion_chunk c
+          table.insert parts, c.content
 
       f response
       message = {
@@ -230,7 +231,7 @@ class OpenAI
 
           json_blob = line\match "^data:%s+(.-)%s*$"
           if json_blob and json_blob~="[DONE]"
-            if chunk = parse_completion_chunk cjson.decode json_blob
+            if chunk = cjson.decode json_blob
               chunk_callback chunk
 
       ...
